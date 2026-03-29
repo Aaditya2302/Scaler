@@ -13,10 +13,13 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+console.log("CLIENT_URL:", process.env.CLIENT_URL);
 const allowedOrigins = [
+  process.env.CLIENT_URL,
   "http://localhost:5173",        // local frontend (Vite)
-  "http://localhost:3000",        // fallback
-  process.env.FRONTEND_URL       // production frontend (Vercel)
+  "http://localhost:3000",
+  "https://scaler-indol.vercel.app"
+      // production frontend (Vercel)
 ];
 
 app.use(cors({
