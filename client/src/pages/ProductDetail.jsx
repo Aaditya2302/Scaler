@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Star, MapPin, ShieldCheck, ChevronRight, Share, ChevronDown, Check, ChevronLeft, ShoppingCart, PlayCircle } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext';
 import { useLanguage } from '../context/LanguageContext';
 
 const DUMMY_DB = {
@@ -148,23 +149,142 @@ const MEGA_MENUS = {
   }
 };
 
+const generateMockProduct = (id) => {
+  let title = "Premium Amazon Product";
+  let category = "General";
+  let image = "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&h=800&fit=crop"; 
+  let price = 999;
+  
+  if (id.includes('shoes')) {
+    title = "Comfortable Sports Shoes for Men & Women";
+    category = "Fashion & Sports";
+    image = "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&h=800&fit=crop";
+    price = 1499;
+  } else if (id.includes('revamp')) {
+    title = "Luxury Home Decor & Furnishing Set";
+    category = "Home";
+    image = "https://images.unsplash.com/photo-1584100936595-c0654b35e263?w=800&h=800&fit=crop";
+    price = 899;
+  } else if (id.includes('school')) {
+    title = "Complete School Essentials & Stationery Kit";
+    category = "Office Products";
+    image = "https://images.unsplash.com/photo-1544816155-12df9643f363?w=800&h=800&fit=crop";
+    price = 299;
+  } else if (id.includes('live') || id.includes('deal') || id.includes('small-biz')) {
+    title = "Special Limited Time Deal Item";
+    category = "Deals";
+    image = "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&h=800&fit=crop";
+    price = 1999;
+  } else if (id.includes('related') || id.includes('bestseller') || id.includes('home-ess')) {
+    title = "Top Rated Customer Favorite Product";
+    category = "Best Sellers";
+    image = "https://images.unsplash.com/photo-1556821839-440d9df764f6?w=800&h=800&fit=crop";
+    price = 799;
+  }
+
+  return {
+    category,
+    breadcrumbs: [category, "Best Sellers", "Item"],
+    brand: "Visit the Generic Store",
+    title: `${title} - Collection: ${id}`,
+    rating: (4.0 + Math.random()).toFixed(1),
+    reviews: Math.floor(Math.random() * 5000) + 100,
+    isDeal: true,
+    discount: "-30%",
+    price,
+    mrp: Math.floor(price * 1.4),
+    fulfilled: true,
+    colors: [
+      { name: "Standard", img: image }
+    ],
+    sizes: ["Regular"],
+    images: [ image, image, image ],
+    details: [
+      { label: "Brand", value: "Generic" },
+      { label: "Quality", value: "Premium" },
+      { label: "Condition", value: "New" }
+    ],
+    about: [
+      "High quality standard material.",
+      "Durability guaranteed for everyday use.",
+      "Comes with manufacturer warranty."
+    ],
+    rufusQuestions: ["Is this product durable?", "What is the warranty period?", "Can it be returned?"],
+    deliveryDate: "Tomorrow",
+    stockStatus: "In Stock.",
+    seller: "Retail Cloud"
+  };
+};
+
 export default function ProductDetail() {
   const { id } = useParams();
-  const product = DUMMY_DB[id] || DUMMY_DB["default"];
-  const productWithId = { ...product, id };
   
-  const [mainImg, setMainImg] = useState(product.images[0]);
-  const [selectedColor, setSelectedColor] = useState(product.colors[0].name);
-  const [selectedSize, setSelectedSize] = useState(product.sizes[0]);
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  const [mainImg, setMainImg] = useState("");
+  const [selectedColor, setSelectedColor] = useState("");
+  const [selectedSize, setSelectedSize] = useState("");
   const [qty, setQty] = useState(1);
   const [activeMenu, setActiveMenu] = useState(null);
 
   const { cartItems, addToCart, updateQuantity } = useCart();
+  const { wishlistItems, addToWishlist } = useWishlist();
   const itemInCart = cartItems.find(item => String(item.id) === String(id));
+  const inWishlist = wishlistItems.some(item => String(item.id) === String(id));
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    setLoading(true);
+    setError(false);
+    
+    const timer = setTimeout(() => {
+      let fetchedProduct = DUMMY_DB[id];
+      if (!fetchedProduct) {
+        if (id === 'error-test') {
+           setError(true);
+           setLoading(false);
+           return;
+        }
+        // Generate a dynamic mock product instead of showing default earbuds
+        fetchedProduct = generateMockProduct(id);
+      }
+
+      setProduct(fetchedProduct);
+      setMainImg(fetchedProduct.images[0]);
+      setSelectedColor(fetchedProduct.colors[0].name);
+      setSelectedSize(fetchedProduct.sizes[0]);
+      setLoading(false);
+    }, 400); // Simulated network delay
+
+    return () => clearTimeout(timer);
   }, [id]);
+
+  if (loading) {
+    return (
+      <div className="bg-white min-h-screen flex items-center justify-center font-sans">
+        <div className="text-[16px] text-gray-700 flex items-center gap-3">
+          <div className="w-8 h-8 border-4 border-[#ffa41c] border-t-transparent rounded-full animate-spin drop-shadow-sm"></div>
+          Loading product...
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <div className="bg-white min-h-screen flex flex-col items-center justify-center font-sans py-20">
+        <h2 className="text-[24px] font-bold text-gray-900 mb-2">Product Not Found</h2>
+        <p className="text-[15px] text-gray-600 mb-6">We couldn't find the product you're looking for.</p>
+        <Link to="/" className="bg-[#ffd814] hover:bg-[#f7ca00] active:bg-[#f2c200] px-6 py-2 rounded-full font-medium shadow-sm transition-colors text-[14px] text-black border border-transparent">
+          Return to Home
+        </Link>
+      </div>
+    );
+  }
+
+  const productWithId = { ...product, id };
 
   return (
     <div className="bg-white min-h-screen text-[14px] text-[#0f1111] font-sans pb-10">
@@ -470,9 +590,17 @@ export default function ProductDetail() {
              
              <div className="h-[1px] bg-gray-200 w-full mb-3"></div>
              
-             <button className="w-full bg-white hover:bg-gray-50 border border-gray-300 rounded-[4px] py-1.5 text-[13px] text-gray-800 shadow-sm text-center mb-0">
-               Add to Wish List
-             </button>
+             {inWishlist ? (
+               <Link to="/wishlist" className="block w-full">
+                 <button className="w-full bg-[#f0f2f2] hover:bg-[#e3e6e6] border border-gray-300 rounded-[4px] py-1.5 text-[13px] text-gray-800 shadow-sm text-center mb-0 transition-colors">
+                   Added to Wish List. View List
+                 </button>
+               </Link>
+             ) : (
+               <button onClick={() => addToWishlist(productWithId)} className="w-full bg-white hover:bg-gray-50 border border-gray-300 rounded-[4px] py-1.5 text-[13px] text-gray-800 shadow-sm text-center mb-0 transition-colors">
+                 Add to Wish List
+               </button>
+             )}
           </div>
           
         </div>
@@ -484,7 +612,7 @@ export default function ProductDetail() {
            <h2 className="text-[20px] font-bold text-gray-900 mb-4 px-2">Customers who viewed this item also viewed</h2>
            <div className="flex gap-4 overflow-x-auto pb-6 scrollbar-hide snap-x px-2">
              {[1,2,3,4,5,6].map((idx) => (
-                <div key={idx} className="min-w-[180px] w-[180px] flex flex-col snap-start shrink-0 mb-2 cursor-pointer group">
+                <Link key={idx} to={`/product/related-${idx}`} className="min-w-[180px] w-[180px] flex flex-col snap-start shrink-0 mb-2 cursor-pointer group block">
                   <div className="w-full h-[180px] bg-white flex items-center justify-center p-2 mb-1">
                     <img src={`https://images.unsplash.com/photo-1556821839-440d9df764f6?w=200&h=200&fit=crop`} className="max-w-full max-h-full object-contain mix-blend-multiply group-hover:opacity-90 transition-opacity" alt="Related product" />
                   </div>
@@ -499,7 +627,7 @@ export default function ProductDetail() {
                     <span className="text-[10px] mt-[3px] pr-0.5 text-black">₹</span><span className="text-[20px] font-medium leading-none">{499 + idx * 50}</span>
                   </div>
                   <div className="text-[12px] text-gray-500 mt-0.5 line-through">₹{1299}</div>
-                </div>
+                </Link>
              ))}
            </div>
         </div>

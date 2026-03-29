@@ -418,8 +418,8 @@ export default function Navbar() {
                       <li className="hover:text-orange-600 hover:underline cursor-pointer">Sign Out</li>
                       <div className="h-[1px] bg-gray-200 my-1 -ml-1 mr-4"></div>
                       <li className="hover:text-orange-600 hover:underline cursor-pointer">Your Account</li>
-                      <li className="hover:text-orange-600 hover:underline cursor-pointer">Your Orders</li>
-                      <li className="hover:text-orange-600 hover:underline cursor-pointer">Your Wish List</li>
+                      <li><Link to="/orders" className="hover:text-orange-600 hover:underline cursor-pointer block">Your Orders</Link></li>
+                      <li><Link to="/wishlist" className="hover:text-orange-600 hover:underline cursor-pointer block">Your Wish List</Link></li>
                       <li className="hover:text-orange-600 hover:underline cursor-pointer">Keep shopping for</li>
                       <li className="hover:text-orange-600 hover:underline cursor-pointer">Your Recommendations</li>
                       <li className="hover:text-orange-600 hover:underline cursor-pointer">Returns</li>
@@ -439,10 +439,10 @@ export default function Navbar() {
             </div>
 
             {/* Returns & Orders */}
-            <div className="hidden md:flex flex-col justify-center leading-tight cursor-pointer border border-transparent hover:border-white px-2 py-1 rounded h-full whitespace-nowrap">
+            <Link to="/orders" className="hidden md:flex flex-col justify-center leading-tight cursor-pointer border border-transparent hover:border-white px-2 py-1 rounded h-full whitespace-nowrap">
               <span className="text-[12px]">{t('returns')}</span>
               <span className="text-[14px] font-bold">{t('orders')}</span>
-            </div>
+            </Link>
 
             {/* Cart */}
             <Link to="/cart" className="flex items-end cursor-pointer border border-transparent hover:border-white px-2 py-1 rounded relative h-full pb-2 shrink-0">
