@@ -239,26 +239,49 @@ export default function ProductDetail() {
     setLoading(true);
     setError(false);
     
-    const timer = setTimeout(() => {
-      let fetchedProduct = DUMMY_DB[id];
-      if (!fetchedProduct) {
-        if (id === 'error-test') {
-           setError(true);
-           setLoading(false);
-           return;
-        }
-        // Generate a dynamic mock product instead of showing default earbuds
-        fetchedProduct = generateMockProduct(id);
+    const fetchProduct = async () => {
+      try {
+        const res = await fetch(`http://localhost:5000/api/products/${id}`);
+        if (!res.ok) throw new Error("Not found");
+        const json = await res.json();
+        
+        const mappedProduct = {
+           id: json.id,
+           title: json.name,
+           category: json.category?.name || "General",
+           breadcrumbs: [json.category?.name || "General", "Products", json.name],
+           brand: "Amazon Selection",
+           rating: json.rating || 4.2,
+           reviews: json.numReviews || 0,
+           isDeal: false,
+           price: json.price,
+           mrp: Math.floor(json.price * 1.2),
+           fulfilled: true,
+           colors: [{ name: "Standard", img: json.images?.[0] || "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&h=800&fit=crop" }],
+           sizes: ["Standard"],
+           images: json.images?.length > 0 ? json.images : ["https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&h=800&fit=crop"],
+           details: [
+             { label: "Description", value: json.description || "High quality product" }
+           ],
+           about: [json.description || "Experience premium quality."],
+           rufusQuestions: ["Tell me more about this product", "What are the specs?"],
+           deliveryDate: "Tomorrow",
+           stockStatus: json.stock > 0 ? "In Stock." : "Out of Stock.",
+           seller: "Amazon Retail"
+        };
+        
+        setProduct(mappedProduct);
+        setMainImg(mappedProduct.images[0]);
+        setSelectedColor(mappedProduct.colors[0].name);
+        setSelectedSize(mappedProduct.sizes[0]);
+        setLoading(false);
+      } catch(err) {
+        setError(true);
+        setLoading(false);
       }
-
-      setProduct(fetchedProduct);
-      setMainImg(fetchedProduct.images[0]);
-      setSelectedColor(fetchedProduct.colors[0].name);
-      setSelectedSize(fetchedProduct.sizes[0]);
-      setLoading(false);
-    }, 400); // Simulated network delay
-
-    return () => clearTimeout(timer);
+    };
+    
+    fetchProduct();
   }, [id]);
 
   if (loading) {

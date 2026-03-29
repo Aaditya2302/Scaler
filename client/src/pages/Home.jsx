@@ -8,7 +8,8 @@ import banner1 from '../assets/banner1.png';
 import banner2 from '../assets/banner2.png';
 import banner3 from '../assets/banner3.png';
 import banner4 from '../assets/banner4.png';
-import { DUMMY_PRODUCTS } from '../data/mockProducts';
+
+const API_BASE_URL = 'http://localhost:5000/api/products';
 
 const CAROUSEL_IMAGES = [
   banner1,
@@ -23,6 +24,31 @@ export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(1);
   const [isTransitioning, setIsTransitioning] = useState(true);
   const [isPaused, setIsPaused] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch products from backend
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch(API_BASE_URL);
+        if (response.ok) {
+          const data = await response.json();
+          setProducts(data);
+        }
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const handleImageError = (e) => {
+    e.target.src = 'https://via.placeholder.com/150';
+  };
 
   const length = CAROUSEL_IMAGES.length;
 
@@ -63,6 +89,10 @@ export default function Home() {
 
   const slides = [CAROUSEL_IMAGES[length - 1], ...CAROUSEL_IMAGES, CAROUSEL_IMAGES[0]];
 
+  if (loading) {
+    return <div className="min-h-screen bg-[#e3e6e6] flex items-center justify-center font-bold text-xl">Loading Products...</div>;
+  }
+
   return (
     <div className="bg-[#e3e6e6] min-h-screen pb-10 font-sans">
       <div className="relative max-w-[1500px] mx-auto">
@@ -102,18 +132,16 @@ export default function Home() {
           <div className="bg-white p-5 flex flex-col h-[420px]">
             <h2 className="text-[21px] font-bold leading-tight mb-4 text-gray-900 pr-4">{t('deals_saved')}</h2>
             <div className="grid grid-cols-2 gap-4 flex-1">
-              <Link to="/product/1" className="cursor-pointer text-center">
-                <img src="https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=150&h=150&fit=crop" className="h-[120px] w-full object-contain mb-1" alt="Table" />
-              </Link>
-              <Link to="/product/2" className="cursor-pointer text-center">
-                <img src="https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=150&h=150&fit=crop" className="h-[120px] w-full object-contain mb-1" alt="Hoodie" />
-              </Link>
-              <Link to="/product/3" className="cursor-pointer text-center">
-                <img src="https://images.unsplash.com/photo-1617137968427-85924c800847?w=150&h=150&fit=crop" className="h-[120px] w-full object-contain mb-1" alt="Half Zip" />
-              </Link>
-              <Link to="/product/4" className="cursor-pointer text-center">
-                <img src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=150&h=150&fit=crop" className="h-[120px] w-full object-contain mb-1" alt="Jacket" />
-              </Link>
+              {products.slice(0, 4).map((product) => (
+                <Link key={product.id} to={`/product/${product.id}`} className="cursor-pointer text-center">
+                  <img 
+                    src={product.images?.[0] || 'https://via.placeholder.com/150'} 
+                    onError={handleImageError}
+                    className="h-[120px] w-full object-contain mb-1" 
+                    alt={product.name} 
+                  />
+                </Link>
+              ))}
             </div>
             <Link to="/" className="text-[13px] text-[#007185] hover:text-[#c45500] hover:underline mt-4">{t('see_more')}</Link>
           </div>
@@ -122,22 +150,17 @@ export default function Home() {
           <div className="bg-white p-5 flex flex-col h-[420px]">
             <h2 className="text-[21px] font-bold leading-tight mb-4 text-gray-900 pr-4">{t('revamp_home')}</h2>
             <div className="grid grid-cols-2 gap-4 gap-y-6 flex-1">
-              <Link to="/product/revamp-1" className="cursor-pointer flex flex-col justify-between">
-                <img src="https://images.unsplash.com/photo-1584100936595-c0654b35e263?w=150&h=120&fit=crop" className="h-[110px] w-full object-cover mb-1" alt="Cushions" />
-                <span className="text-[12px] leading-tight text-gray-800">Cushion covers, bedsheets & more</span>
-              </Link>
-              <Link to="/product/revamp-2" className="cursor-pointer flex flex-col justify-between">
-                <img src="https://images.unsplash.com/photo-1507652313656-b72e5008dd52?w=150&h=120&fit=crop" className="h-[110px] w-full object-cover mb-1" alt="Figurines" />
-                <span className="text-[12px] leading-tight text-gray-800">Figurines, vases & more</span>
-              </Link>
-              <Link to="/product/revamp-3" className="cursor-pointer flex flex-col justify-between">
-                <img src="https://images.unsplash.com/photo-1595515106969-1ce29566ff1c?w=150&h=120&fit=crop" className="h-[110px] w-full object-cover mb-1" alt="Storage" />
-                <span className="text-[12px] leading-tight text-gray-800">Home storage</span>
-              </Link>
-              <Link to="/product/revamp-4" className="cursor-pointer flex flex-col justify-between">
-                <img src="https://images.unsplash.com/photo-1507149833261-aa7a8f154bea?w=150&h=120&fit=crop" className="h-[110px] w-full object-cover mb-1" alt="Lighting" />
-                <span className="text-[12px] leading-tight text-gray-800">Lighting solutions</span>
-              </Link>
+              {products.slice(4, 8).map((product) => (
+                <Link key={product.id} to={`/product/${product.id}`} className="cursor-pointer flex flex-col justify-between">
+                  <img 
+                    src={product.images?.[0] || 'https://via.placeholder.com/150'} 
+                    onError={handleImageError}
+                    className="h-[110px] w-full object-cover mb-1" 
+                    alt={product.name} 
+                  />
+                  <span className="text-[12px] line-clamp-2 leading-tight text-gray-800">{product.name}</span>
+                </Link>
+              ))}
             </div>
             <Link to="/" className="text-[13px] text-[#007185] hover:text-[#c45500] hover:underline mt-4">{t('explore_all')}</Link>
           </div>
@@ -146,22 +169,17 @@ export default function Home() {
           <div className="bg-white p-5 flex flex-col h-[420px]">
             <h2 className="text-[21px] font-bold leading-tight mb-4 text-gray-900 pr-4">{t('up_to_60')}</h2>
             <div className="grid grid-cols-2 gap-4 gap-y-6 flex-1">
-              <Link to="/product/shoes-1" className="cursor-pointer flex flex-col justify-between">
-                <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=150&h=120&fit=crop" className="h-[110px] w-full object-contain bg-gray-50 mb-1" alt="Shoes" />
-                <span className="text-[12px] leading-tight text-gray-800">Sports shoes</span>
-              </Link>
-              <Link to="/product/shoes-2" className="cursor-pointer flex flex-col justify-between">
-                <img src="https://images.unsplash.com/photo-1614594975525-e45190c55d40?w=150&h=120&fit=crop" className="h-[110px] w-full object-contain bg-gray-50 mb-1" alt="Men shoes" />
-                <span className="text-[12px] leading-tight text-gray-800">Men's shoes</span>
-              </Link>
-              <Link to="/product/shoes-3" className="cursor-pointer flex flex-col justify-between">
-                <img src="https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=150&h=120&fit=crop" className="h-[110px] w-full object-contain bg-gray-50 mb-1" alt="Heels" />
-                <span className="text-[12px] leading-tight text-gray-800">Women's shoes</span>
-              </Link>
-              <Link to="/product/shoes-4" className="cursor-pointer flex flex-col justify-between">
-                <img src="https://images.unsplash.com/photo-1584916201218-f4242ceb4809?w=150&h=120&fit=crop" className="h-[110px] w-full object-contain bg-gray-50 mb-1" alt="Handbags" />
-                <span className="text-[12px] leading-tight text-gray-800">Handbags</span>
-              </Link>
+              {products.slice(8, 12).map((product) => (
+                <Link key={product.id} to={`/product/${product.id}`} className="cursor-pointer flex flex-col justify-between">
+                  <img 
+                    src={product.images?.[0] || 'https://via.placeholder.com/150'} 
+                    onError={handleImageError}
+                    className="h-[110px] w-full object-contain bg-gray-50 mb-1" 
+                    alt={product.name} 
+                  />
+                  <span className="text-[12px] line-clamp-2 leading-tight text-gray-800">{product.name}</span>
+                </Link>
+              ))}
             </div>
             <Link to="/" className="text-[13px] text-[#007185] hover:text-[#c45500] hover:underline mt-4">{t('see_all')}</Link>
           </div>
@@ -169,9 +187,16 @@ export default function Home() {
           {/* Card 4 */}
           <div className="bg-white p-5 flex flex-col h-[420px]">
             <h2 className="text-[21px] font-bold leading-tight mb-4 text-gray-900 pr-4">{t('up_to_75')}</h2>
-            <Link to="/product/5" className="flex-1 flex justify-center items-center h-[280px]">
-              <img src="https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=350&h=350&fit=crop" className="max-h-full max-w-full object-contain bg-[#f9ebe0] w-full h-full" alt="Headphones" />
-            </Link>
+            {products[12] && (
+              <Link to={`/product/${products[12].id}`} className="flex-1 flex justify-center items-center h-[280px]">
+                <img 
+                  src={products[12].images?.[0] || 'https://via.placeholder.com/150'} 
+                  onError={handleImageError}
+                  className="max-h-full max-w-full object-contain bg-[#f9ebe0] w-full h-full" 
+                  alt={products[12].name} 
+                />
+              </Link>
+            )}
             <Link to="/" className="text-[13px] text-[#007185] hover:text-[#c45500] hover:underline mt-4">{t('shop_now')}</Link>
           </div>
           
@@ -184,7 +209,12 @@ export default function Home() {
               <h2 className="text-[21px] font-bold leading-tight mb-2 text-gray-900">Starting ₹70,348 | Engineered for the road</h2>
               <Link to="/" className="text-[13px] text-[#007185] hover:text-[#c45500] hover:underline">See all offers</Link>
             </div>
-            <img src="https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=400&h=150&fit=crop" className="h-[100px] w-full sm:w-[300px] object-cover rounded" alt="Engineered for the road" />
+            <img 
+              src={products[47]?.images?.[0] || 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=400&h=150&fit=crop'} 
+              onError={handleImageError}
+              className="h-[100px] w-full sm:w-[300px] object-cover rounded" 
+              alt="Engineered for the road" 
+            />
           </div>
         </div>
 
@@ -197,8 +227,13 @@ export default function Home() {
             </div>
             <div className="flex flex-col md:flex-row gap-4">
               {/* Video snapshot */}
-              <Link to="/product/live-video" className="w-full md:w-[450px] shrink-0 relative cursor-pointer block">
-                <img src="https://images.unsplash.com/photo-1555529771-464a9bd4191c?w=450&h=250&fit=crop" className="w-full h-[250px] object-cover rounded shadow ring-1 ring-gray-200" alt="Live Event" />
+              <Link to={`/product/${products[48]?.id || 'live-video'}`} className="w-full md:w-[450px] shrink-0 relative cursor-pointer block">
+                <img 
+                  src={products[48]?.images?.[0] || 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=450&h=250&fit=crop'} 
+                  onError={handleImageError}
+                  className="w-full h-[250px] object-cover rounded shadow ring-1 ring-gray-200" 
+                  alt="Live Event" 
+                />
                 <div className="absolute inset-0 bg-black/20 flex items-center justify-center rounded">
                   <div className="w-14 h-14 bg-black/60 rounded-full flex items-center justify-center p-1 cursor-pointer hover:bg-black/80 transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="white" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
@@ -207,15 +242,20 @@ export default function Home() {
               </Link>
               {/* Product Cards */}
               <div className="flex flex-1 gap-4 overflow-x-auto pb-2 scrollbar-hide snap-x">
-                {['1511707171634-5f8f7eb4815a', '1505740420928-5e560c06d30e', '1523206489230-c6224c5bbd69', '1505156868547-9b19f7fd1ae3', '1546868871-7041f2a55e12', '1600080972464-8e5fcea04ac4', '1526170375885-3ba577e38714', '1584990347449-a6e812f8e136'].map((imgId, idx) => (
-                  <Link key={idx} to={`/product/live-${idx+1}`} className="min-w-[150px] border border-gray-200 rounded p-3 flex flex-col cursor-pointer snap-start hover:shadow-md transition-shadow">
+                {products.slice(13, 21).map((product, idx) => (
+                  <Link key={product.id} to={`/product/${product.id}`} className="min-w-[150px] border border-gray-200 rounded p-3 flex flex-col cursor-pointer snap-start hover:shadow-md transition-shadow">
                     <div className="h-[120px] w-full mb-2 flex items-center justify-center">
-                      <img src={`https://images.unsplash.com/photo-${imgId}?w=120&h=120&fit=crop`} className="max-w-full max-h-full object-contain mix-blend-multiply" alt="Product" />
+                      <img 
+                        src={product.images?.[0] || 'https://via.placeholder.com/150'} 
+                        onError={handleImageError}
+                        className="max-w-full max-h-full object-contain mix-blend-multiply" 
+                        alt={product.name} 
+                      />
                     </div>
-                    <span className="text-[11px] bg-[#CC0C39] text-white px-2 py-0.5 w-max font-bold mb-1 rounded-[2px]">Up to {(idx + 1) * 10}% off</span>
+                    <span className="text-[11px] bg-[#CC0C39] text-white px-2 py-0.5 w-max font-bold mb-1 rounded-[2px]">Up to {Math.floor(Math.random() * 20) + 10}% off</span>
                     <span className="text-[12px] text-[#CC0C39] font-bold leading-tight mb-1">Limited time deal</span>
                     <div className="flex items-baseline gap-1 mt-auto">
-                      <span className="text-[15px] font-bold text-gray-900">₹{(idx + 1) * 10},999</span>
+                      <span className="text-[15px] font-bold text-gray-900">₹{product.price?.toLocaleString()}</span>
                     </div>
                   </Link>
                 ))}
@@ -231,9 +271,14 @@ export default function Home() {
           <div className="bg-white p-5 flex flex-col h-[420px]">
             <h2 className="text-[21px] font-bold leading-tight mb-4 text-gray-900 pr-4">Customers' Most-Loved Fashion for you</h2>
             <div className="grid grid-cols-2 gap-4 flex-1">
-              {['1542291026-7eec264c27ff', '1515886657613-9f3515b0c78f', '1434389670869-bace65042450', '1608231387042-66d1773070a5'].map((imgId, i) => (
-                <Link key={i} to={`/product/${i+10}`} className="cursor-pointer text-center">
-                  <img src={`https://images.unsplash.com/photo-${imgId}?w=150&h=150&fit=crop`} className="h-[120px] w-full object-contain mb-1" alt="Fashion" />
+              {products.slice(21, 25).map((product) => (
+                <Link key={product.id} to={`/product/${product.id}`} className="cursor-pointer text-center">
+                  <img 
+                    src={product.images?.[0] || 'https://via.placeholder.com/150'} 
+                    onError={handleImageError}
+                    className="h-[120px] w-full object-contain mb-1" 
+                    alt={product.name} 
+                  />
                 </Link>
               ))}
             </div>
@@ -244,22 +289,17 @@ export default function Home() {
           <div className="bg-white p-5 flex flex-col h-[420px]">
              <h2 className="text-[21px] font-bold leading-tight mb-4 text-gray-900 pr-4">For all your school needs</h2>
              <div className="grid grid-cols-2 gap-4 gap-y-6 flex-1">
-               <Link to="/product/school-1" className="cursor-pointer flex flex-col justify-between">
-                 <img src="https://images.unsplash.com/photo-1544816155-12df9643f363?w=150&h=120&fit=crop" className="h-[110px] w-full object-cover mb-1" alt="Notebooks" />
-                 <span className="text-[12px] leading-tight text-gray-800">Notebooks, diaries & more</span>
-               </Link>
-               <Link to="/product/school-2" className="cursor-pointer flex flex-col justify-between">
-                 <img src="https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=150&h=120&fit=crop" className="h-[110px] w-full object-cover mb-1" alt="Books" />
-                 <span className="text-[12px] leading-tight text-gray-800">School books</span>
-               </Link>
-               <Link to="/product/school-3" className="cursor-pointer flex flex-col justify-between">
-                 <img src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=150&h=120&fit=crop" className="h-[110px] w-full object-cover mb-1" alt="Storage" />
-                 <span className="text-[12px] leading-tight text-gray-800">Books bundles</span>
-               </Link>
-               <Link to="/product/school-4" className="cursor-pointer flex flex-col justify-between">
-                 <img src="https://images.unsplash.com/photo-1517842645767-c639042777db?w=150&h=120&fit=crop" className="h-[110px] w-full object-cover mb-1" alt="Writing" />
-                 <span className="text-[12px] leading-tight text-gray-800">Pens, pencils & writing supplies</span>
-               </Link>
+               {products.slice(25, 29).map((product) => (
+                 <Link key={product.id} to={`/product/${product.id}`} className="cursor-pointer flex flex-col justify-between">
+                   <img 
+                     src={product.images?.[0] || 'https://via.placeholder.com/150'} 
+                     onError={handleImageError}
+                     className="h-[110px] w-full object-cover mb-1" 
+                     alt={product.name} 
+                   />
+                   <span className="text-[12px] line-clamp-2 leading-tight text-gray-800">{product.name}</span>
+                 </Link>
+               ))}
              </div>
              <Link to="/" className="text-[13px] text-[#007185] hover:text-[#c45500] hover:underline mt-4">See all</Link>
           </div>
@@ -268,9 +308,14 @@ export default function Home() {
           <div className="bg-white p-5 flex flex-col h-[420px]">
              <h2 className="text-[21px] font-bold leading-tight mb-4 text-gray-900 pr-4">Min. 30% off | Top deals from Small Businesses</h2>
              <div className="grid grid-cols-2 gap-4 gap-y-6 flex-1">
-               {['1505691938859-e1bc18cb8e07', '1507149833261-aa7a8f154bea', '1518455027359-f3f8164ba6bd', '1485955900006-d0c28e7349ce'].map((imgId, i) => (
-                 <Link key={i} to={`/product/small-biz-${i+1}`} className="cursor-pointer flex flex-col justify-between">
-                   <img src={`https://images.unsplash.com/photo-${imgId}?w=150&h=120&fit=crop`} className="h-[120px] w-full object-cover" alt="Small business deal" />
+               {products.slice(29, 33).map((product) => (
+                 <Link key={product.id} to={`/product/${product.id}`} className="cursor-pointer flex flex-col justify-between">
+                   <img 
+                     src={product.images?.[0] || 'https://via.placeholder.com/150'} 
+                     onError={handleImageError}
+                     className="h-[120px] w-full object-cover" 
+                     alt={product.name} 
+                   />
                  </Link>
                ))}
              </div>
@@ -281,9 +326,14 @@ export default function Home() {
           <div className="bg-white p-5 flex flex-col h-[420px]">
              <h2 className="text-[21px] font-bold leading-tight mb-4 text-gray-900 pr-4">Min. 45% off | Deals on home essentials from Amazon Lau...</h2>
              <div className="grid grid-cols-2 gap-4 gap-y-6 flex-1">
-               {['1505693314120-0d4438671346', '1493663280031-bbf4a2ea14c7', '1416862291207-4ca732144d83', '1517668808822-9ebb02f2a0e6'].map((imgId, i) => (
-                 <Link key={i} to={`/product/home-ess-${i+1}`} className="cursor-pointer flex flex-col justify-between">
-                   <img src={`https://images.unsplash.com/photo-${imgId}?w=150&h=120&fit=crop`} className="h-[120px] w-full object-cover" alt="Home essentials" />
+               {products.slice(33, 37).map((product) => (
+                 <Link key={product.id} to={`/product/${product.id}`} className="cursor-pointer flex flex-col justify-between">
+                   <img 
+                     src={product.images?.[0] || 'https://via.placeholder.com/150'} 
+                     onError={handleImageError}
+                     className="h-[120px] w-full object-cover" 
+                     alt={product.name} 
+                   />
                  </Link>
                ))}
              </div>
@@ -300,9 +350,14 @@ export default function Home() {
               <Link to="/" className="text-[14px] text-[#007185] hover:text-[#c45500] hover:underline mt-1">See more</Link>
             </div>
             <div className="flex gap-5 overflow-x-auto pb-4 scrollbar-hide snap-x">
-               {['1524805444758-089113d48a6d', '1593359677879-a4bb92f829d1', '1516035069371-29a1b244cc32', '1601925260368-ae2f83cf8b7f', '1584990347449-a6e812f8e136', '1505156868547-9b19f7fd1ae3', '1523206489230-c6224c5bbd69', '1505691938859-e1bc18cb8e07', '1542291026-7eec264c27ff', '1553062407-98eeb64c6a62'].map((imgId, idx) => (
-                 <Link key={idx} to={`/product/bestseller-${idx+1}`} className="min-w-[200px] h-[200px] cursor-pointer snap-start shrink-0 mr-1 hover:opacity-90 transition-opacity block">
-                   <img src={`https://images.unsplash.com/photo-${imgId}?w=200&h=200&fit=crop`} className="w-full h-full object-contain bg-gray-50 mix-blend-multiply" alt="Deal strip product" />
+               {products.slice(37, 47).map((product) => (
+                 <Link key={product.id} to={`/product/${product.id}`} className="min-w-[200px] h-[200px] cursor-pointer snap-start shrink-0 mr-1 hover:opacity-90 transition-opacity block">
+                   <img 
+                    src={product.images?.[0] || 'https://via.placeholder.com/150'} 
+                    onError={handleImageError}
+                    className="w-full h-full object-contain bg-gray-50 mix-blend-multiply" 
+                    alt={product.name} 
+                   />
                  </Link>
                ))}
             </div>

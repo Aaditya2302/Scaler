@@ -1,16 +1,45 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { DUMMY_PRODUCTS } from '../data/mockProducts';
 import { Star } from 'lucide-react';
 
 export default function Search() {
   const [searchParams] = useSearchParams();
   const query = searchParams.get('q') || '';
 
-  const results = DUMMY_PRODUCTS.filter(product => 
-    product.name.toLowerCase().includes(query.toLowerCase()) || 
-    product.category.toLowerCase().includes(query.toLowerCase())
-  );
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchSearchResults = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(`http://localhost:5000/api/products/search?q=${encodeURIComponent(query)}`);
+        if (res.ok) {
+          const data = await res.json();
+          const mappedData = data.map(p => ({
+            id: p.id,
+            name: p.name,
+            category: p.category ? p.category.name : 'General',
+            rating: p.rating || 4.2,
+            count: p.numReviews || 0,
+            price: p.price,
+            image: p.images && p.images.length > 0 ? p.images[0] : 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200&h=200&fit=crop'
+          }));
+          setResults(mappedData);
+        }
+      } catch (err) {
+        console.error("Search error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (query) {
+      fetchSearchResults();
+    } else {
+      setResults([]);
+      setLoading(false);
+    }
+  }, [query]);
 
   return (
     <div className="bg-white min-h-screen py-6 px-4 font-sans border-t border-gray-200">
@@ -20,7 +49,11 @@ export default function Search() {
            <p className="text-sm text-gray-600 mt-1">Showing {results.length} results based on your search</p>
         </div>
 
-        {results.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-20 flex justify-center">
+            <div className="w-8 h-8 border-4 border-[#ffa41c] border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        ) : results.length === 0 ? (
           <div className="text-center py-20 bg-gray-50 rounded border border-gray-200 shadow-sm">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">No results found</h2>
             <p className="text-gray-600">Try checking your spelling or use more general terms</p>
@@ -45,7 +78,7 @@ export default function Search() {
                      <span className="flex items-center text-[#ffa41c] mr-2">
                        {product.rating} <Star className="w-3.5 h-3.5 fill-[#ffa41c] ml-1 mt-0.5" />
                      </span>
-                     <span className="hover:underline cursor-pointer">{product.count} limits</span>
+                     <span className="hover:underline cursor-pointer">{product.count} reviews</span>
                   </div>
                   
                   <div className="flex items-start text-2xl font-medium text-gray-900 mb-2">

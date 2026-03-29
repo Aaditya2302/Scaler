@@ -36,7 +36,7 @@ export default function Checkout() {
     }
   };
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     if (cartCount === 0) {
       alert("Your cart is empty!");
       return;
@@ -50,9 +50,14 @@ export default function Checkout() {
       shippingAddress: formData
     };
 
-    const orderId = addOrder(orderData);
-    clearCart();
-    navigate(`/order-confirmation/${orderId}`);
+    try {
+      const orderId = await addOrder(orderData);
+      clearCart();
+      navigate(`/order-confirmation/${orderId}`);
+    } catch (error) {
+      console.error("Order error:", error);
+      alert("Failed to place your order. Please try again.");
+    }
   };
 
   return (
