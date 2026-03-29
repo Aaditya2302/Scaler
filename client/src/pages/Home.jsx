@@ -8,17 +8,7 @@ import banner1 from '../assets/banner1.png';
 import banner2 from '../assets/banner2.png';
 import banner3 from '../assets/banner3.png';
 import banner4 from '../assets/banner4.png';
-
-const DUMMY_PRODUCTS = [
-  { id: 1, name: "Wireless Earbuds with Active Noise Cancelling", price: 99.99, image: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=400&h=400&fit=crop", category: "Electronics", rating: 4.5, count: 1200 },
-  { id: 2, name: "Smart TV 55 Inch 4K UHD", price: 499.99, image: "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=400&h=400&fit=crop", category: "Electronics", rating: 4.8, count: 853 },
-  { id: 3, name: "Programmable Coffee Maker with Glass Carafe", price: 59.99, image: "https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6?w=400&h=400&fit=crop", category: "Home", rating: 4.2, count: 420 },
-  { id: 4, name: "Men's Everyday Running Shoes", price: 79.99, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop", category: "Sports", rating: 4.6, count: 2150 },
-  { id: 5, name: "Non-Stick Cookware Set, 12-Piece", price: 129.50, image: "https://images.unsplash.com/photo-1584990347449-a6e812f8e136?w=400&h=400&fit=crop", category: "Home", rating: 4.7, count: 934 },
-  { id: 6, name: "Professional DSLR Camera with Kit Lens", price: 899.00, image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&h=400&fit=crop", category: "Electronics", rating: 4.9, count: 154 },
-  { id: 7, name: "Yoga Mat with Alignment Lines", price: 29.99, image: "https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f?w=400&h=400&fit=crop", category: "Sports", rating: 4.3, count: 830 },
-  { id: 8, name: "Electric Toothbrush with Extra Brush Heads", price: 45.00, image: "https://images.unsplash.com/photo-1559544978-654dbbd3c3ed?w=400&h=400&fit=crop", category: "Health", rating: 4.8, count: 3200 },
-];
+import { DUMMY_PRODUCTS } from '../data/mockProducts';
 
 const CAROUSEL_IMAGES = [
   banner1,

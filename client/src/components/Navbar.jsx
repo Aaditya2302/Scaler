@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, ShoppingCart, Menu, MapPin, ChevronDown, User, X, ChevronRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useUser } from '../context/UserContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -259,10 +259,36 @@ const RufusSidebar = ({ isOpen, onClose }) => {
   );
 };
 
+const SEARCH_SUGGESTIONS = [
+  "shirt for man",
+  "sunscreen spf50",
+  "smart watch for man",
+  "samsung s26",
+  "s26 ultra samsung 5g",
+  "samsung s24 ultra 5g mobile",
+  "samsung s24 ultra 5+g mobile",
+  "saree for woman",
+  "short kurti for women latest",
+  "slippers for man",
+  "shoes for men",
+  "sports shoes",
+  "smart tv 55 inch",
+  "school bags for boys",
+  "school bags for girls",
+  "shoes",
+  "washing machine",
+  "watch for men",
+  "wireless earbuds",
+  "women dress"
+];
+
 export default function Navbar() {
   const { cartCount } = useCart();
   const { user } = useUser();
   const { t, language, setLanguage } = useLanguage();
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isHoveringMenu, setIsHoveringMenu] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isRufusOpen, setIsRufusOpen] = useState(false);
@@ -310,8 +336,11 @@ export default function Navbar() {
           </div>
 
           {/* Search Bar */}
-          <div className="flex-1 hidden sm:flex h-10 rounded-md overflow-hidden bg-white hover:ring-2 ring-orange-400 focus-within:ring-2 border-none">
-            <div className="relative flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 text-[12px] px-2 border-r border-gray-300 outline-none shrink-0 cursor-pointer">
+          <form 
+            onSubmit={(e) => { e.preventDefault(); if (searchQuery.trim()) { setIsSearchFocused(false); navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`); } }}
+            className="flex-1 hidden sm:flex h-10 rounded-md bg-white hover:ring-2 ring-orange-400 focus-within:ring-2 border-none relative z-[60]"
+          >
+            <div className="relative flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 text-[12px] px-2 border-r border-gray-300 outline-none shrink-0 cursor-pointer rounded-l-md">
               <select 
                 value={selectedCategory} 
                 onChange={(e) => setSelectedCategory(e.target.value)}
@@ -328,13 +357,53 @@ export default function Navbar() {
             </div>
             <input 
               type="text" 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => setIsSearchFocused(true)}
+              onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
               placeholder={t('search_placeholder')} 
-              className="flex-1 px-3 text-black outline-none text-[15px] placeholder-gray-500"
+              className="flex-1 px-3 text-black outline-none text-[15px] placeholder-gray-500 rounded-none z-[61]"
             />
-            <button className="bg-[#febd69] hover:bg-[#f3a847] w-12 flex items-center justify-center text-gray-900 cursor-pointer shrink-0">
+            <button type="submit" className="bg-[#febd69] hover:bg-[#f3a847] w-12 flex items-center justify-center text-gray-900 cursor-pointer shrink-0 rounded-r-md z-[61]">
               <Search className="w-5 h-5 font-bold" />
             </button>
-          </div>
+
+            {/* Suggestions Autocomplete Dropdown */}
+            {isSearchFocused && searchQuery.trim().length > 0 && (
+              <div className="absolute top-[41px] left-0 right-0 bg-white border border-gray-200 shadow-[0_4px_10px_rgba(0,0,0,0.15)] rounded-b-md py-1 z-[9999] flex flex-col items-stretch text-[15px] font-sans text-left">
+                {SEARCH_SUGGESTIONS
+                  .filter(s => s.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .slice(0, 10)
+                  .map((suggestion, idx) => {
+                     const matchIndex = suggestion.toLowerCase().indexOf(searchQuery.toLowerCase());
+                     return (
+                       <div 
+                         key={idx}
+                         onMouseDown={(e) => {
+                           e.preventDefault();
+                           setSearchQuery(suggestion);
+                           setIsSearchFocused(false);
+                           navigate(`/search?q=${encodeURIComponent(suggestion)}`);
+                         }}
+                         className="px-4 py-2 cursor-pointer hover:bg-gray-100 flex items-center gap-3 w-full"
+                       >
+                         <Search className="w-[18px] h-[18px] text-gray-400 shrink-0" />
+                         <span className="text-gray-900 w-full truncate font-medium">
+                           {matchIndex >= 0 ? (
+                             <>
+                               <span className="font-normal">{suggestion.slice(0, matchIndex + searchQuery.length)}</span>
+                               <span className="font-bold">{suggestion.slice(matchIndex + searchQuery.length)}</span>
+                             </>
+                           ) : (
+                             <span className="font-bold">{suggestion}</span>
+                           )}
+                         </span>
+                       </div>
+                     );
+                })}
+              </div>
+            )}
+          </form>
 
           {/* Right Section */}
           <div className="flex items-center gap-1 sm:gap-2 h-full py-2 relative">

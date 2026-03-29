@@ -197,6 +197,10 @@ export default function Checkout() {
                 <span>₹{cartTotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
+                <span>Estimated Tax (8%):</span>
+                <span>₹{tax.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
                 <span>Promotion Applied:</span>
                 <span>-₹0.00</span>
               </div>
