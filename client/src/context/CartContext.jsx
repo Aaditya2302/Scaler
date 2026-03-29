@@ -9,7 +9,7 @@ export function CartProvider({ children }) {
     // Fetch initial cart state from backend
     const fetchCart = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/cart');
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/cart`);
         if (res.ok) {
           const data = await res.json();
           const mapped = data.map(item => ({
@@ -41,7 +41,7 @@ export function CartProvider({ children }) {
     });
 
     try {
-      await fetch('http://localhost:5000/api/cart', {
+      await fetch(`${import.meta.env.VITE_API_URL}/api/cart`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ productId: String(product.id), quantity: parseInt(quantity) })
@@ -51,7 +51,7 @@ export function CartProvider({ children }) {
 
   const removeFromCart = async (id) => {
     setCartItems(prev => prev.filter(item => String(item.id) !== String(id)));
-    fetch(`http://localhost:5000/api/cart/${id}`, { method: 'DELETE' }).catch(console.error);
+    fetch(`${import.meta.env.VITE_API_URL}/api/cart/${id}`, { method: 'DELETE' }).catch(console.error);
   };
 
   const updateQuantity = async (id, quantity) => {
@@ -62,7 +62,7 @@ export function CartProvider({ children }) {
       String(item.id) === String(id) ? { ...item, quantity: parsedQty } : item
     ));
     
-    fetch(`http://localhost:5000/api/cart/${id}`, { 
+    fetch(`${import.meta.env.VITE_API_URL}/api/cart/${id}`, { 
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ quantity: parsedQty })
@@ -71,7 +71,7 @@ export function CartProvider({ children }) {
 
   const clearCart = async () => {
     setCartItems([]);
-    fetch('http://localhost:5000/api/cart', { method: 'DELETE' }).catch(console.error);
+    fetch(`${import.meta.env.VITE_API_URL}/api/cart`, { method: 'DELETE' }).catch(console.error);
   };
 
   const cartTotal = cartItems.reduce((total, item) => total + ((item.price || 0) * item.quantity), 0);

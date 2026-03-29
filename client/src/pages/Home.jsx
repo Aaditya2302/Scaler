@@ -9,7 +9,7 @@ import banner2 from '../assets/banner2.png';
 import banner3 from '../assets/banner3.png';
 import banner4 from '../assets/banner4.png';
 
-const API_BASE_URL = 'http://localhost:5000/api/products';
+const API_BASE_URL = `${import.meta.env.VITE_API_URL}/api/products`;
 
 const CAROUSEL_IMAGES = [
   banner1,

@@ -8,7 +8,7 @@ export function WishlistProvider({ children }) {
   useEffect(() => {
     const fetchWishlist = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/wishlist');
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/wishlist`);
         if (res.ok) {
           const data = await res.json();
           const mapped = data.map(item => ({
@@ -34,7 +34,7 @@ export function WishlistProvider({ children }) {
     });
 
     try {
-      await fetch('http://localhost:5000/api/wishlist', {
+      await fetch(`${import.meta.env.VITE_API_URL}/api/wishlist`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ productId: String(product.id) })
@@ -47,7 +47,7 @@ export function WishlistProvider({ children }) {
   const removeFromWishlist = async (id) => {
     setWishlistItems(prev => prev.filter(item => String(item.id) !== String(id)));
     try {
-      await fetch(`http://localhost:5000/api/wishlist/${id}`, { method: 'DELETE' });
+      await fetch(`${import.meta.env.VITE_API_URL}/api/wishlist/${id}`, { method: 'DELETE' });
     } catch (e) {
       console.error('Wishlist removal failed', e);
     }

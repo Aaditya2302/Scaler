@@ -13,7 +13,7 @@ export function UserProvider({ children }) {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/users/profile');
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users/profile`);
         if (res.ok) {
           const data = await res.json();
           const defaultAddress = data.addresses?.find(a => a.isDefault) || data.addresses?.[0] || {};

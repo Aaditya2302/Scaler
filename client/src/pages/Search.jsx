@@ -13,7 +13,7 @@ export default function Search() {
     const fetchSearchResults = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`http://localhost:5000/api/products/search?q=${encodeURIComponent(query)}`);
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/products/search?q=${encodeURIComponent(query)}`);
         if (res.ok) {
           const data = await res.json();
           const mappedData = data.map(p => ({
